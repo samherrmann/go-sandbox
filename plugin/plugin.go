@@ -3,4 +3,4 @@ package main
 import "log"
 
 // SayHello logs the string "Hello!"
-func SayHello() { log.Println("Hello!") }
+func SayHello(name string) { log.Printf("Hello %v!", name) }

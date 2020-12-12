@@ -22,7 +22,7 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	f.(func())()
+	f.(func(name string))("World")
 }
 
 func executableDir() (string, error) {
