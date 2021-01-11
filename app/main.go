@@ -1,7 +1,11 @@
 package main
 
-import "log"
+import (
+	"github.com/samherrmann/go-sanbox/app/consumer"
+	"github.com/samherrmann/go-sanbox/app/producer"
+)
 
 func main() {
-	log.Println("Hello World!")
+	p := producer.New()
+	consumer.DoStuff(p)
 }
