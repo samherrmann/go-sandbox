@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 )
@@ -21,6 +22,10 @@ func (err *FoobarError) Unwrap() error {
 func (err *FoobarError) Is(target error) bool {
 	_, ok := target.(*FoobarError)
 	return ok
+}
+
+func IsFoobar(err error) bool {
+	return errors.Is(err, &FoobarError{})
 }
 
 func SomeFunc() error {
