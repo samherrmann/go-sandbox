@@ -1,0 +1,26 @@
+{
+  "fooPath": "relative/path",
+  "bars": [
+    {
+      "path": "relative/path"
+    },
+    {
+      "path": "another/relative/path"
+    },
+    {
+      "path": "../another/relative/path"
+    },
+    {
+      "path": "../../another/relative/path"
+    },
+    {
+      "path": "../../../another/relative/path"
+    },
+    {
+      "path": "../../../../another/relative/path"
+    },
+    {
+      "path": "/absolute/path/to/bar3"
+    }
+  ]
+}
