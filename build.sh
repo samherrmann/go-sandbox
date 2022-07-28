@@ -1,3 +1,3 @@
 #!/bin/bash
 mkdir -p dist
-go build -o dist ./app
+go build -o dist .
