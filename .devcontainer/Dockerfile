@@ -1,23 +1,15 @@
 # See here for image contents:
 # https://github.com/microsoft/vscode-dev-containers/tree/v0.209.6/containers/go/.devcontainer/base.Dockerfile
 
-# [Choice] Go version (use -bullseye variants on local arm64/Apple Silicon): 1,
-# 1.16, 1.17, 1-bullseye, 1.16-bullseye, 1.17-bullseye, 1-buster, 1.16-buster,
-# 1.17-buster
-ARG VARIANT
-FROM mcr.microsoft.com/vscode/devcontainers/go:0-${VARIANT}
+FROM golang:1.20-bullseye
 
-# [Choice] Node.js version: none, lts/*, 16, 14, 12, 10
-ARG NODE_VERSION="none"
-RUN if [ "${NODE_VERSION}" != "none" ]; then su vscode -c "umask 0002 && . /usr/local/share/nvm/nvm.sh && nvm install ${NODE_VERSION} 2>&1"; fi
+RUN useradd --create-home --shell /bin/bash dev
 
-# [Optional] Uncomment this section to install additional OS packages.
-# RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-#     && apt-get -y install --no-install-recommends <your-package-list-here>
-
-# [Optional] Uncomment the next lines to use go get to install anything else you need
-# USER vscode
-# RUN go get -x <your-dependency-or-tool>
-
-# [Optional] Uncomment this line to install global node packages.
-# RUN su vscode -c "source /usr/local/share/nvm/nvm.sh && npm install -g <your-package-here>" 2>&1
+# Install Go extension dependencies.
+RUN go install -v github.com/cweill/gotests/gotests@v1.6.0 \
+  && go install -v github.com/fatih/gomodifytags@v1.16.0 \
+  && go install -v github.com/josharian/impl@v1.1.0 \
+  && go install -v github.com/haya14busa/goplay/cmd/goplay@v1.0.0 \
+  && go install -v github.com/go-delve/delve/cmd/dlv@v1.21.0 \
+  && go install -v honnef.co/go/tools/cmd/staticcheck@v0.4.3 \
+  && go install -v golang.org/x/tools/gopls@v0.13.1
