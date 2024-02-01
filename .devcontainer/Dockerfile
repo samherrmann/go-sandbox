@@ -5,6 +5,8 @@ FROM golang:1.20-bullseye
 
 RUN useradd --create-home --shell /bin/bash dev
 
+USER dev
+
 # Install Go extension dependencies.
 RUN go install -v github.com/cweill/gotests/gotests@v1.6.0 \
   && go install -v github.com/fatih/gomodifytags@v1.16.0 \
