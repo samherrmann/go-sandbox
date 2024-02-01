@@ -1,2 +1,7 @@
-dist
+# Files
+.sqlhistory
 go-sandbox
+
+# Folders
+data/
+dist/

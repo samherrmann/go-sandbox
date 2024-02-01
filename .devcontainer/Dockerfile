@@ -5,6 +5,8 @@ FROM golang:1.21-bullseye
 
 RUN useradd --create-home --shell /bin/bash dev
 
+RUN curl -L https://github.com/dolthub/dolt/releases/latest/download/install.sh | bash
+
 USER dev
 
 # Install Go extension dependencies.
