@@ -1,7 +1,7 @@
 # See here for image contents:
 # https://github.com/microsoft/vscode-dev-containers/tree/v0.209.6/containers/go/.devcontainer/base.Dockerfile
 
-FROM golang:1.20-bullseye
+FROM golang:1.21-bullseye
 
 RUN useradd --create-home --shell /bin/bash dev
 
