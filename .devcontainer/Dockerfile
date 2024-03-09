@@ -14,4 +14,4 @@ RUN go install -v github.com/cweill/gotests/gotests@v1.6.0 \
   && go install -v github.com/haya14busa/goplay/cmd/goplay@v1.0.0 \
   && go install -v github.com/go-delve/delve/cmd/dlv@v1.21.0 \
   && go install -v honnef.co/go/tools/cmd/staticcheck@v0.4.3 \
-  && go install -v golang.org/x/tools/gopls@v0.13.1
+  && go install -v golang.org/x/tools/gopls@v0.15.1
