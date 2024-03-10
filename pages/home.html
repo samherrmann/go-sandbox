@@ -3,9 +3,9 @@
     {{ range $index, $todo := . }}
       <li>
         {{ $todo }}
-        <form action="/delete" method="post" style="display: inline-block;">
+        <form action="/delete" method="post">
           <input type="hidden" name="index" value="{{ $index }}">
-          <button type="submit" style="display: inline-block;">Delete</button>
+          <button type="submit">Delete</button>
         </form>
       </li>
     {{ end }}

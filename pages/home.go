@@ -10,7 +10,7 @@ import (
 	"github.com/samherrmann/go-sandbox/pages/internal"
 )
 
-//go:embed home.html
+//go:embed home.html home.css
 var homeFS embed.FS
 
 func NewHome(logger *slog.Logger) (*Home, error) {
@@ -38,6 +38,7 @@ func (h *Home) GetToDos() http.HandlerFunc {
 			Title: "To Do",
 			Data:  h.todos,
 		}
+		page.AddStyleSheet(homeFS, "home.css")
 		if err := h.tpl.Execute(w, page); err != nil {
 			h.logger.Error(err.Error())
 		}

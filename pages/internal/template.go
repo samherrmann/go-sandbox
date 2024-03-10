@@ -2,6 +2,7 @@ package internal
 
 import (
 	"embed"
+	"fmt"
 	"io"
 	"io/fs"
 	"text/template"
@@ -31,6 +32,21 @@ func (t *Template) Execute(w io.Writer, page Page) error {
 }
 
 type Page struct {
-	Title string
-	Data  any
+	Title  string
+	Styles string
+	Data   any
+}
+
+func (p *Page) AddStyleSheet(fs fs.FS, name string) error {
+	f, err := fs.Open(name)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	styles, err := io.ReadAll(f)
+	if err != nil {
+		return err
+	}
+	p.Styles = fmt.Sprintf("%s\n%s", p.Styles, styles)
+	return nil
 }
