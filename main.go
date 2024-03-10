@@ -27,6 +27,7 @@ func app() error {
 	http.Handle("/", http.RedirectHandler("/todo", http.StatusMovedPermanently))
 	http.HandleFunc("GET /todo", homePage.GetToDos())
 	http.HandleFunc("POST /todo/add", homePage.AddToDo())
+	http.HandleFunc("POST /todo/{id}/update", homePage.UpdateToDo())
 	http.HandleFunc("POST /todo/{id}/delete", homePage.RemoveToDo())
 
 	addr := ":8080"

@@ -60,6 +60,32 @@ func (h *Home) AddToDo() http.HandlerFunc {
 	}
 }
 
+func (h *Home) UpdateToDo() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if err := r.ParseForm(); err != nil {
+			h.logger.Error(err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		indexStr := r.PathValue("id")
+		index, err := strconv.Atoi(indexStr)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+		}
+
+		value := r.Form.Get("value")
+
+		if index >= len(h.todos) {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		h.todos[index] = value
+
+		w.Header().Add("Location", "/todo")
+		w.WriteHeader(http.StatusSeeOther)
+	}
+}
+
 func (h *Home) RemoveToDo() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if err := r.ParseForm(); err != nil {

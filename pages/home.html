@@ -1,8 +1,11 @@
-{{ define "page" }}
+{{ define "body" }}
   <ol>
     {{ range $index, $todo := . }}
       <li>
-        {{ $todo }}
+        <form action="/todo/{{ $index }}/update" method="post">
+          <input type="text" name="value" value="{{ $todo }}">
+          <button type="submit">Save</button>
+        </form>
         <form action="/todo/{{ $index }}/delete" method="post">
           <button type="submit">Delete</button>
         </form>
