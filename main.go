@@ -26,6 +26,7 @@ func app() error {
 
 	http.HandleFunc("GET /", homePage.GetToDos())
 	http.HandleFunc("POST /", homePage.AddToDo())
+	http.HandleFunc("POST /delete", homePage.RemoveToDo())
 
 	addr := ":8080"
 	fmt.Printf("Listening on %v...\n", addr)
