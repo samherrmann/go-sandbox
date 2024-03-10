@@ -17,7 +17,7 @@ func main() {
 }
 
 func app() error {
-	logger := slog.New(&slog.TextHandler{})
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
 	homePage, err := pages.NewHome(logger)
 	if err != nil {
