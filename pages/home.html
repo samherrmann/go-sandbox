@@ -1,0 +1,11 @@
+{{ define "page" }}
+  <ol>
+    {{ range $todo := . }}
+      <li>{{ $todo }}</li>
+    {{ end }}
+  </ol>
+  <form action="/" method="post">
+    <input type="text" name="value">
+    <button type="submit">Add</button>
+  </form>
+{{ end }}
