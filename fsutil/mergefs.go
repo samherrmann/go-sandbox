@@ -1,12 +1,13 @@
-package templates
+package fsutil
 
 import (
 	"errors"
 	"io/fs"
 )
 
+// MergeFS returns a merged file system of the given file systems.
 func MergeFS(filesys ...fs.FS) *mergedFS {
-	merged := make(mergedFS, 0)
+	merged := mergedFS{}
 	for _, f := range filesys {
 		merged = append(merged, f)
 	}
@@ -14,10 +15,6 @@ func MergeFS(filesys ...fs.FS) *mergedFS {
 }
 
 type mergedFS []fs.FS
-
-func (mfs *mergedFS) Add(filesys ...fs.FS) {
-	*mfs = append(*mfs, filesys...)
-}
 
 func (mfs *mergedFS) Open(name string) (fs.File, error) {
 	for _, filesys := range *mfs {

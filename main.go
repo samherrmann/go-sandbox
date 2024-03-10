@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/samherrmann/go-sandbox/pages"
-	"github.com/samherrmann/go-sandbox/templates"
 )
 
 func main() {
@@ -19,9 +18,11 @@ func main() {
 
 func app() error {
 	logger := slog.New(&slog.TextHandler{})
-	tpls := templates.New()
 
-	homePage := pages.NewHome(logger, tpls)
+	homePage, err := pages.NewHome(logger)
+	if err != nil {
+		return err
+	}
 
 	http.HandleFunc("GET /", homePage.GetToDos())
 	http.HandleFunc("POST /", homePage.AddToDo())

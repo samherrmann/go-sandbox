@@ -1,35 +1,42 @@
 package pages
 
 import (
+	"embed"
 	"log/slog"
 	"net/http"
 
-	"github.com/samherrmann/go-sandbox/templates"
+	"github.com/samherrmann/go-sandbox/pages/internal"
 )
 
-func NewHome(logger *slog.Logger, tpls *templates.Templates) *Home {
-	tpls.Add(embedded, "home.html")
+//go:embed home.html
+var homeFS embed.FS
+
+func NewHome(logger *slog.Logger) (*Home, error) {
+	tpl, err := internal.ParseTemplate(homeFS, "home.html")
+	if err != nil {
+		return nil, err
+	}
 
 	return &Home{
 		todos:  []string{},
 		logger: logger,
-		tpls:   tpls,
-	}
+		tpl:    tpl,
+	}, nil
 }
 
 type Home struct {
-	tpls   *templates.Templates
+	tpl    *internal.Template
 	logger *slog.Logger
 	todos  []string
 }
 
 func (h *Home) GetToDos() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		page := templates.Page{
+		page := internal.Page{
 			Title: "To Do",
 			Data:  h.todos,
 		}
-		if err := h.tpls.ExecuteTemplate(w, "home.html", page); err != nil {
+		if err := h.tpl.Execute(w, page); err != nil {
 			h.logger.Error(err.Error())
 		}
 	}
