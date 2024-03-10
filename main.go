@@ -24,9 +24,10 @@ func app() error {
 		return err
 	}
 
-	http.HandleFunc("GET /", homePage.GetToDos())
-	http.HandleFunc("POST /", homePage.AddToDo())
-	http.HandleFunc("POST /delete", homePage.RemoveToDo())
+	http.Handle("/", http.RedirectHandler("/todo", http.StatusMovedPermanently))
+	http.HandleFunc("GET /todo", homePage.GetToDos())
+	http.HandleFunc("POST /todo/add", homePage.AddToDo())
+	http.HandleFunc("POST /todo/{id}/delete", homePage.RemoveToDo())
 
 	addr := ":8080"
 	fmt.Printf("Listening on %v...\n", addr)

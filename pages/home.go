@@ -4,7 +4,6 @@ import (
 	"embed"
 	"log/slog"
 	"net/http"
-	"path"
 	"strconv"
 
 	"github.com/samherrmann/go-sandbox/pages/internal"
@@ -56,7 +55,7 @@ func (h *Home) AddToDo() http.HandlerFunc {
 		if value != "" {
 			h.todos = append(h.todos, value)
 		}
-		w.Header().Add("Location", r.URL.Path)
+		w.Header().Add("Location", "/todo")
 		w.WriteHeader(http.StatusSeeOther)
 	}
 }
@@ -68,7 +67,7 @@ func (h *Home) RemoveToDo() http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		indexStr := r.Form.Get("index")
+		indexStr := r.PathValue("id")
 		index, err := strconv.Atoi(indexStr)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -76,7 +75,7 @@ func (h *Home) RemoveToDo() http.HandlerFunc {
 
 		h.todos = append(h.todos[:index], h.todos[index+1:]...)
 
-		w.Header().Add("Location", path.Dir(r.URL.Path))
+		w.Header().Add("Location", "/todo")
 		w.WriteHeader(http.StatusSeeOther)
 	}
 }

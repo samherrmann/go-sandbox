@@ -3,14 +3,13 @@
     {{ range $index, $todo := . }}
       <li>
         {{ $todo }}
-        <form action="/delete" method="post">
-          <input type="hidden" name="index" value="{{ $index }}">
+        <form action="/todo/{{ $index }}/delete" method="post">
           <button type="submit">Delete</button>
         </form>
       </li>
     {{ end }}
   </ol>
-  <form action="/" method="post">
+  <form action="/todo/add" method="post">
     <input type="text" name="value">
     <button type="submit">Add</button>
   </form>
