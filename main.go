@@ -30,5 +30,5 @@ func app() error {
 
 	addr := ":8080"
 	fmt.Printf("Listening on %v...\n", addr)
-	return http.ListenAndServe(":8080", nil)
+	return http.ListenAndServe(addr, nil)
 }
