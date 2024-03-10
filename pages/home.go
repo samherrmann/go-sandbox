@@ -8,7 +8,7 @@ import (
 )
 
 func NewHome(logger *slog.Logger, tpls *templates.Templates) *Home {
-	tpls.Add("pages/home.html")
+	tpls.Add(embedded, "home.html")
 
 	return &Home{
 		todos:  []string{},
@@ -29,7 +29,7 @@ func (h *Home) GetToDos() http.HandlerFunc {
 			Title: "To Do",
 			Data:  h.todos,
 		}
-		if err := h.tpls.ExecuteTemplate(w, "pages/home.html", page); err != nil {
+		if err := h.tpls.ExecuteTemplate(w, "home.html", page); err != nil {
 			h.logger.Error(err.Error())
 		}
 	}

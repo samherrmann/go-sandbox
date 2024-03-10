@@ -1,26 +1,34 @@
 package templates
 
 import (
+	"embed"
 	"fmt"
+	"html/template"
 	"io"
-	"text/template"
+	"io/fs"
 )
+
+//go:embed root.html
+var embedded embed.FS
 
 func New() *Templates {
 	return &Templates{
+		fs:       MergeFS(embedded),
 		registry: make(map[string]*template.Template),
 	}
 }
 
 type Templates struct {
+	fs       *mergedFS
 	registry map[string]*template.Template
 }
 
-func (tpls Templates) Add(name string) error {
+func (tpls Templates) Add(fs fs.FS, name string) error {
+	tpls.fs.Add(fs)
 	if tpls.registry[name] != nil {
 		return fmt.Errorf("template %q already exists", name)
 	}
-	tpl, err := template.ParseFiles("templates/root.html", name)
+	tpl, err := template.ParseFS(tpls.fs, "root.html", name)
 	if err != nil {
 		return err
 	}
