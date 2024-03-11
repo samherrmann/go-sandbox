@@ -1,4 +1,4 @@
-package internal
+package view
 
 import (
 	"fmt"
@@ -6,14 +6,14 @@ import (
 	"io/fs"
 )
 
-type Page struct {
+type View struct {
 	Title  string
 	Path   string
 	Styles string
 	Data   any
 }
 
-func (p *Page) AddStyleSheet(fs fs.FS, name string) error {
+func (p *View) AddStyleSheet(fs fs.FS, name string) error {
 	f, err := fs.Open(name)
 	if err != nil {
 		return err

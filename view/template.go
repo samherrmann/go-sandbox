@@ -1,4 +1,4 @@
-package internal
+package view
 
 import (
 	"embed"
@@ -26,6 +26,6 @@ type Template struct {
 	std *template.Template
 }
 
-func (t *Template) Execute(w io.Writer, page *Page) error {
-	return t.std.Execute(w, page)
+func (t *Template) Execute(w io.Writer, view *View) error {
+	return t.std.Execute(w, view)
 }

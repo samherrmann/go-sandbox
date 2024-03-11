@@ -7,15 +7,16 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/samherrmann/go-sandbox/httputil"
 	"github.com/samherrmann/go-sandbox/models"
-	"github.com/samherrmann/go-sandbox/pages/internal"
+	"github.com/samherrmann/go-sandbox/view"
 )
 
 //go:embed todo.html todo.css
 var todoFS embed.FS
 
 func NewToDo(mux *http.ServeMux, path string, logger *slog.Logger) (*ToDo, error) {
-	tpl, err := internal.ParseTemplate(todoFS, "todo.html")
+	tpl, err := view.ParseTemplate(todoFS, "todo.html")
 	if err != nil {
 		return nil, err
 	}
@@ -37,20 +38,20 @@ func NewToDo(mux *http.ServeMux, path string, logger *slog.Logger) (*ToDo, error
 
 type ToDo struct {
 	Path   string
-	tpl    *internal.Template
+	tpl    *view.Template
 	logger *slog.Logger
 	todos  *models.ToDo
 }
 
 func (h *ToDo) Get() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		page := &internal.Page{
+		view := &view.View{
 			Title: "To Do",
 			Path:  h.Path,
 			Data:  h.todos,
 		}
-		page.AddStyleSheet(todoFS, "todo.css")
-		if err := h.tpl.Execute(w, page); err != nil {
+		view.AddStyleSheet(todoFS, "todo.css")
+		if err := h.tpl.Execute(w, view); err != nil {
 			h.logger.Error(err.Error())
 		}
 	}
@@ -66,7 +67,7 @@ func (h *ToDo) Add() http.HandlerFunc {
 
 		h.todos.Append(r.Form.Get("value"))
 
-		internal.SeeOther(w, h.Path)
+		httputil.SeeOther(w, h.Path)
 	}
 }
 
@@ -89,7 +90,7 @@ func (h *ToDo) Update() http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		internal.SeeOther(w, h.Path)
+		httputil.SeeOther(w, h.Path)
 	}
 }
 
@@ -111,6 +112,6 @@ func (h *ToDo) Delete() http.HandlerFunc {
 			return
 		}
 
-		internal.SeeOther(w, h.Path)
+		httputil.SeeOther(w, h.Path)
 	}
 }
