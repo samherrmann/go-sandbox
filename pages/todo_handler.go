@@ -2,7 +2,6 @@ package pages
 
 import (
 	"embed"
-	"fmt"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -15,39 +14,43 @@ import (
 //go:embed todo.html todo.css
 var todoFS embed.FS
 
-func NewToDo(mux *http.ServeMux, path string, logger *slog.Logger) (*ToDo, error) {
+func NewTodoHandler(path string, logger *slog.Logger) (http.Handler, error) {
 	tpl, err := view.ParseTemplate(todoFS, "todo.html")
 	if err != nil {
 		return nil, err
 	}
 
 	todo := &ToDo{
-		Path:   path,
+		path:   path,
 		todos:  &models.ToDo{},
 		logger: logger,
 		tpl:    tpl,
 	}
 
-	mux.HandleFunc(fmt.Sprintf("GET %s", path), todo.Get())
-	mux.HandleFunc(fmt.Sprintf("POST %s/add", path), todo.Add())
-	mux.HandleFunc(fmt.Sprintf("POST %s/{id}/update", path), todo.Update())
-	mux.HandleFunc(fmt.Sprintf("POST %s/{id}/delete", path), todo.Delete())
-
 	return todo, nil
 }
 
 type ToDo struct {
-	Path   string
+	path   string
 	tpl    *view.Template
 	logger *slog.Logger
 	todos  *models.ToDo
 }
 
-func (h *ToDo) Get() http.HandlerFunc {
+func (h *ToDo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /", h.read())
+	mux.HandleFunc("POST /create", h.create())
+	mux.HandleFunc("POST /{id}/update", h.update())
+	mux.HandleFunc("POST /{id}/delete", h.delete())
+	mux.ServeHTTP(w, r)
+}
+
+func (h *ToDo) read() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		view := &view.View{
 			Title: "To Do",
-			Path:  h.Path,
+			Path:  h.path,
 			Data:  h.todos,
 		}
 		view.AddStyleSheet(todoFS, "todo.css")
@@ -57,7 +60,7 @@ func (h *ToDo) Get() http.HandlerFunc {
 	}
 }
 
-func (h *ToDo) Add() http.HandlerFunc {
+func (h *ToDo) create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if err := r.ParseForm(); err != nil {
 			h.logger.Error(err.Error())
@@ -67,11 +70,11 @@ func (h *ToDo) Add() http.HandlerFunc {
 
 		h.todos.Append(r.Form.Get("value"))
 
-		httputil.SeeOther(w, h.Path)
+		httputil.SeeOther(w, h.path)
 	}
 }
 
-func (h *ToDo) Update() http.HandlerFunc {
+func (h *ToDo) update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if err := r.ParseForm(); err != nil {
 			h.logger.Error(err.Error())
@@ -90,11 +93,11 @@ func (h *ToDo) Update() http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		httputil.SeeOther(w, h.Path)
+		httputil.SeeOther(w, h.path)
 	}
 }
 
-func (h *ToDo) Delete() http.HandlerFunc {
+func (h *ToDo) delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if err := r.ParseForm(); err != nil {
 			h.logger.Error(err.Error())
@@ -112,6 +115,6 @@ func (h *ToDo) Delete() http.HandlerFunc {
 			return
 		}
 
-		httputil.SeeOther(w, h.Path)
+		httputil.SeeOther(w, h.path)
 	}
 }

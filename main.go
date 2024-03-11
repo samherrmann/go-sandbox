@@ -19,18 +19,33 @@ func main() {
 func app() error {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-	todoPage, err := pages.NewToDo(http.DefaultServeMux, "/todo", logger)
+	router, err := newRouter(logger)
 	if err != nil {
 		return err
 	}
 
-	// Redirect home page to todo page.
-	http.Handle(
-		"/",
-		http.RedirectHandler(todoPage.Path, http.StatusMovedPermanently),
-	)
-
 	addr := ":8080"
 	fmt.Printf("Listening on %v...\n", addr)
-	return http.ListenAndServe(addr, nil)
+	return http.ListenAndServe(addr, router)
+}
+
+func newRouter(logger *slog.Logger) (*http.ServeMux, error) {
+	mux := http.NewServeMux()
+
+	// Create handlers.
+	todoPath := "/todo"
+	todoHandler, err := pages.NewTodoHandler(todoPath, logger)
+	if err != nil {
+		return nil, err
+	}
+	homeHandler := pages.NewHomeHandler(todoPath)
+
+	// Register handlers in mux.
+	//
+	// Trailing-slash redirection:
+	// https://pkg.go.dev/net/http#hdr-Trailing_slash_redirection
+	mux.Handle(todoPath+"/", http.StripPrefix(todoPath, todoHandler))
+	mux.Handle("/", homeHandler)
+
+	return mux, nil
 }
