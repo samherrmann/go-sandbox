@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/samherrmann/go-sandbox/models"
 	"github.com/samherrmann/go-sandbox/pages/internal"
 )
 
@@ -23,7 +24,7 @@ func NewHome(logger *slog.Logger) (*Home, error) {
 	}
 
 	return &Home{
-		todos:  []string{},
+		todos:  &models.ToDo{},
 		logger: logger,
 		tpl:    tpl,
 	}, nil
@@ -32,7 +33,7 @@ func NewHome(logger *slog.Logger) (*Home, error) {
 type Home struct {
 	tpl    *internal.Template
 	logger *slog.Logger
-	todos  []string
+	todos  *models.ToDo
 }
 
 func (h *Home) GetToDos() http.HandlerFunc {
@@ -56,10 +57,7 @@ func (h *Home) AddToDo() http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		value := r.Form.Get("value")
-		if value != "" {
-			h.todos = append(h.todos, value)
-		}
+		h.todos.Append(r.Form.Get("value"))
 		w.Header().Add("Location", homePath)
 		w.WriteHeader(http.StatusSeeOther)
 	}
@@ -80,11 +78,10 @@ func (h *Home) UpdateToDo() http.HandlerFunc {
 
 		value := r.Form.Get("value")
 
-		if index >= len(h.todos) {
+		if err := h.todos.Update(index, value); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		h.todos[index] = value
 
 		w.Header().Add("Location", homePath)
 		w.WriteHeader(http.StatusSeeOther)
@@ -104,7 +101,10 @@ func (h *Home) RemoveToDo() http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 		}
 
-		h.todos = append(h.todos[:index], h.todos[index+1:]...)
+		if err := h.todos.Remove(index); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
 
 		w.Header().Add("Location", homePath)
 		w.WriteHeader(http.StatusSeeOther)
