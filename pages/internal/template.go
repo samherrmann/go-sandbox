@@ -33,6 +33,7 @@ func (t *Template) Execute(w io.Writer, page Page) error {
 
 type Page struct {
 	Title  string
+	Path   string
 	Styles string
 	Data   any
 }

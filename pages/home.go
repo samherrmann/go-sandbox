@@ -9,6 +9,10 @@ import (
 	"github.com/samherrmann/go-sandbox/pages/internal"
 )
 
+const (
+	homePath = "/todo"
+)
+
 //go:embed home.html home.css
 var homeFS embed.FS
 
@@ -35,6 +39,7 @@ func (h *Home) GetToDos() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		page := internal.Page{
 			Title: "To Do",
+			Path:  homePath,
 			Data:  h.todos,
 		}
 		page.AddStyleSheet(homeFS, "home.css")
@@ -55,7 +60,7 @@ func (h *Home) AddToDo() http.HandlerFunc {
 		if value != "" {
 			h.todos = append(h.todos, value)
 		}
-		w.Header().Add("Location", "/todo")
+		w.Header().Add("Location", homePath)
 		w.WriteHeader(http.StatusSeeOther)
 	}
 }
@@ -81,7 +86,7 @@ func (h *Home) UpdateToDo() http.HandlerFunc {
 		}
 		h.todos[index] = value
 
-		w.Header().Add("Location", "/todo")
+		w.Header().Add("Location", homePath)
 		w.WriteHeader(http.StatusSeeOther)
 	}
 }
@@ -101,7 +106,7 @@ func (h *Home) RemoveToDo() http.HandlerFunc {
 
 		h.todos = append(h.todos[:index], h.todos[index+1:]...)
 
-		w.Header().Add("Location", "/todo")
+		w.Header().Add("Location", homePath)
 		w.WriteHeader(http.StatusSeeOther)
 	}
 }
