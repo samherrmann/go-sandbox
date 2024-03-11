@@ -63,9 +63,10 @@ func (h *ToDo) Add() http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+
 		h.todos.Append(r.Form.Get("value"))
-		w.Header().Add("Location", h.Path)
-		w.WriteHeader(http.StatusSeeOther)
+
+		internal.SeeOther(w, h.Path)
 	}
 }
 
@@ -88,9 +89,7 @@ func (h *ToDo) Update() http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-
-		w.Header().Add("Location", h.Path)
-		w.WriteHeader(http.StatusSeeOther)
+		internal.SeeOther(w, h.Path)
 	}
 }
 
@@ -112,7 +111,6 @@ func (h *ToDo) Delete() http.HandlerFunc {
 			return
 		}
 
-		w.Header().Add("Location", h.Path)
-		w.WriteHeader(http.StatusSeeOther)
+		internal.SeeOther(w, h.Path)
 	}
 }
