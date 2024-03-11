@@ -27,7 +27,7 @@ type Template struct {
 	std *template.Template
 }
 
-func (t *Template) Execute(w io.Writer, page Page) error {
+func (t *Template) Execute(w io.Writer, page *Page) error {
 	return t.std.Execute(w, page)
 }
 

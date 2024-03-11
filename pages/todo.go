@@ -44,7 +44,7 @@ type ToDo struct {
 
 func (h *ToDo) Get() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		page := internal.Page{
+		page := &internal.Page{
 			Title: "To Do",
 			Path:  h.Path,
 			Data:  h.todos,
