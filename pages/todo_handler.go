@@ -39,15 +39,15 @@ type ToDo struct {
 
 func (h *ToDo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /", h.read())
-	mux.HandleFunc("POST /create", h.create())
-	mux.HandleFunc("POST /{id}/update", h.update())
-	mux.HandleFunc("POST /{id}/delete", h.delete())
+	mux.Handle("GET /", httputil.ExactPathHandler("/", h.read()))
+	mux.Handle("POST /create", h.create())
+	mux.Handle("POST /{id}/update", h.update())
+	mux.Handle("POST /{id}/delete", h.delete())
 	mux.ServeHTTP(w, r)
 }
 
-func (h *ToDo) read() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func (h *ToDo) read() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		view := &view.View{
 			Title: "To Do",
 			Path:  h.path,
@@ -57,11 +57,11 @@ func (h *ToDo) read() http.HandlerFunc {
 		if err := h.tpl.Execute(w, view); err != nil {
 			h.logger.Error(err.Error())
 		}
-	}
+	})
 }
 
-func (h *ToDo) create() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func (h *ToDo) create() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if err := r.ParseForm(); err != nil {
 			h.logger.Error(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
@@ -71,11 +71,11 @@ func (h *ToDo) create() http.HandlerFunc {
 		h.todos.Append(r.Form.Get("value"))
 
 		httputil.SeeOther(w, h.path)
-	}
+	})
 }
 
-func (h *ToDo) update() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func (h *ToDo) update() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if err := r.ParseForm(); err != nil {
 			h.logger.Error(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
@@ -94,11 +94,11 @@ func (h *ToDo) update() http.HandlerFunc {
 			return
 		}
 		httputil.SeeOther(w, h.path)
-	}
+	})
 }
 
-func (h *ToDo) delete() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func (h *ToDo) delete() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if err := r.ParseForm(); err != nil {
 			h.logger.Error(err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
@@ -116,5 +116,5 @@ func (h *ToDo) delete() http.HandlerFunc {
 		}
 
 		httputil.SeeOther(w, h.path)
-	}
+	})
 }

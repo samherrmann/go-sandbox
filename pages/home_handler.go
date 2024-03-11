@@ -1,14 +1,15 @@
 package pages
 
-import "net/http"
+import (
+	"net/http"
 
-func NewHomeHandler(redirectPaths string) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Process exact match only.
-		if r.URL.Path != "/" {
-			http.NotFound(w, r)
-			return
-		}
-		http.Redirect(w, r, redirectPaths, http.StatusMovedPermanently)
-	})
+	"github.com/samherrmann/go-sandbox/httputil"
+)
+
+func NewHomeHandler(path string, redirectPaths string) http.Handler {
+	redirectHandler := http.RedirectHandler(
+		redirectPaths,
+		http.StatusMovedPermanently,
+	)
+	return httputil.ExactPathHandler(path, redirectHandler)
 }
