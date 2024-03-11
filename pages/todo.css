@@ -5,3 +5,18 @@ form {
 li {
   padding: 1rem 0.5rem;
 }
+
+li form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+li .controls {
+  display: none;
+}
+
+li:focus-within .controls {
+  display: flex;
+  gap: 1rem;
+}

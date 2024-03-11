@@ -2,12 +2,16 @@
   <ol>
     {{ range $index, $todo := .Data }}
       <li>
-        <form action="{{ $.Path }}/{{ $index }}/update" method="post">
+        <form method="post">
           <input type="text" name="value" value="{{ $todo }}">
-          <button type="submit">Save</button>
-        </form>
-        <form action="{{ $.Path }}/{{ $index }}/delete" method="post">
-          <button type="submit">Delete</button>
+          <divc class="controls">
+            <button type="submit" formaction="{{ $.Path }}/{{ $index }}/update">
+              Save
+            </button>
+            <button type="submit" formaction="{{ $.Path }}/{{ $index }}/delete">
+              Delete
+            </button>
+          </div>
         </form>
       </li>
     {{ end }}
