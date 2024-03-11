@@ -20,12 +20,20 @@ func NewTodoHandler(path string, logger *slog.Logger) (http.Handler, error) {
 		return nil, err
 	}
 
+	mux := http.NewServeMux()
+
 	todo := &ToDo{
 		path:   path,
 		todos:  &models.ToDo{},
 		logger: logger,
 		tpl:    tpl,
+		mux:    mux,
 	}
+
+	mux.Handle("GET /", httputil.ExactPathHandler("/", todo.read()))
+	mux.Handle("POST /create", todo.create())
+	mux.Handle("POST /{id}/update", todo.update())
+	mux.Handle("POST /{id}/delete", todo.delete())
 
 	return todo, nil
 }
@@ -35,15 +43,11 @@ type ToDo struct {
 	tpl    *view.Template
 	logger *slog.Logger
 	todos  *models.ToDo
+	mux    *http.ServeMux
 }
 
 func (h *ToDo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	mux := http.NewServeMux()
-	mux.Handle("GET /", httputil.ExactPathHandler("/", h.read()))
-	mux.Handle("POST /create", h.create())
-	mux.Handle("POST /{id}/update", h.update())
-	mux.Handle("POST /{id}/delete", h.delete())
-	mux.ServeHTTP(w, r)
+	h.mux.ServeHTTP(w, r)
 }
 
 func (h *ToDo) read() http.Handler {
