@@ -2,6 +2,7 @@ package pages
 
 import (
 	"embed"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -10,27 +11,32 @@ import (
 	"github.com/samherrmann/go-sandbox/pages/internal"
 )
 
-const (
-	todoPath = "/todo"
-)
-
 //go:embed todo.html todo.css
 var todoFS embed.FS
 
-func NewToDo(logger *slog.Logger) (*ToDo, error) {
+func NewToDo(mux *http.ServeMux, path string, logger *slog.Logger) (*ToDo, error) {
 	tpl, err := internal.ParseTemplate(todoFS, "todo.html")
 	if err != nil {
 		return nil, err
 	}
 
-	return &ToDo{
+	todo := &ToDo{
+		Path:   path,
 		todos:  &models.ToDo{},
 		logger: logger,
 		tpl:    tpl,
-	}, nil
+	}
+
+	mux.HandleFunc(fmt.Sprintf("GET %s", path), todo.Get())
+	mux.HandleFunc(fmt.Sprintf("POST %s/add", path), todo.Add())
+	mux.HandleFunc(fmt.Sprintf("POST %s/{id}/update", path), todo.Update())
+	mux.HandleFunc(fmt.Sprintf("POST %s/{id}/delete", path), todo.Delete())
+
+	return todo, nil
 }
 
 type ToDo struct {
+	Path   string
 	tpl    *internal.Template
 	logger *slog.Logger
 	todos  *models.ToDo
@@ -40,7 +46,7 @@ func (h *ToDo) Get() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		page := internal.Page{
 			Title: "To Do",
-			Path:  todoPath,
+			Path:  h.Path,
 			Data:  h.todos,
 		}
 		page.AddStyleSheet(todoFS, "todo.css")
@@ -58,7 +64,7 @@ func (h *ToDo) Add() http.HandlerFunc {
 			return
 		}
 		h.todos.Append(r.Form.Get("value"))
-		w.Header().Add("Location", todoPath)
+		w.Header().Add("Location", h.Path)
 		w.WriteHeader(http.StatusSeeOther)
 	}
 }
@@ -83,7 +89,7 @@ func (h *ToDo) Update() http.HandlerFunc {
 			return
 		}
 
-		w.Header().Add("Location", todoPath)
+		w.Header().Add("Location", h.Path)
 		w.WriteHeader(http.StatusSeeOther)
 	}
 }
@@ -106,7 +112,7 @@ func (h *ToDo) Delete() http.HandlerFunc {
 			return
 		}
 
-		w.Header().Add("Location", todoPath)
+		w.Header().Add("Location", h.Path)
 		w.WriteHeader(http.StatusSeeOther)
 	}
 }

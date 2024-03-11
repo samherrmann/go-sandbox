@@ -19,16 +19,16 @@ func main() {
 func app() error {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-	todoPage, err := pages.NewToDo(logger)
+	todoPage, err := pages.NewToDo(http.DefaultServeMux, "/todo", logger)
 	if err != nil {
 		return err
 	}
 
-	http.Handle("/", http.RedirectHandler("/todo", http.StatusMovedPermanently))
-	http.HandleFunc("GET /todo", todoPage.Get())
-	http.HandleFunc("POST /todo/add", todoPage.Add())
-	http.HandleFunc("POST /todo/{id}/update", todoPage.Update())
-	http.HandleFunc("POST /todo/{id}/delete", todoPage.Delete())
+	// Redirect home page to todo page.
+	http.Handle(
+		"/",
+		http.RedirectHandler(todoPage.Path, http.StatusMovedPermanently),
+	)
 
 	addr := ":8080"
 	fmt.Printf("Listening on %v...\n", addr)
