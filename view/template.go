@@ -2,9 +2,9 @@ package view
 
 import (
 	"embed"
+	"html/template"
 	"io"
 	"io/fs"
-	"text/template"
 
 	"github.com/samherrmann/go-sandbox/fsutil"
 )

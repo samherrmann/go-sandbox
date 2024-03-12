@@ -2,6 +2,7 @@ package view
 
 import (
 	"fmt"
+	"html/template"
 	"io"
 	"io/fs"
 )
@@ -9,7 +10,7 @@ import (
 type View struct {
 	Title  string
 	Path   string
-	Styles string
+	Styles template.CSS
 	Data   any
 }
 
@@ -23,6 +24,6 @@ func (p *View) AddStyleSheet(fs fs.FS, name string) error {
 	if err != nil {
 		return err
 	}
-	p.Styles = fmt.Sprintf("%s\n%s", p.Styles, styles)
+	p.Styles = template.CSS(fmt.Sprintf("%s\n%s", p.Styles, styles))
 	return nil
 }
