@@ -30,7 +30,7 @@ func NewTodoHandler(path string, logger *slog.Logger) (http.Handler, error) {
 		mux:    mux,
 	}
 
-	mux.Handle("GET /", httputil.ExactPathHandler("/", todo.read()))
+	mux.Handle("GET /{$}", todo.read())
 	mux.Handle("POST /create", todo.create())
 	mux.Handle("POST /{id}/update", todo.update())
 	mux.Handle("POST /{id}/delete", todo.delete())

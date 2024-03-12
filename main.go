@@ -39,7 +39,7 @@ func newRouter(logger *slog.Logger) (*http.ServeMux, error) {
 		return nil, err
 	}
 
-	homePath := "/"
+	homePath := "/{$}"
 	homeHandler := pages.NewHomeHandler(homePath, todoPath)
 
 	// Register handlers in mux.
