@@ -52,13 +52,7 @@ func (h *ToDo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (h *ToDo) read() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		view := &view.View{
-			Title: "To Do",
-			Path:  h.path,
-			Data:  h.todos,
-		}
-		view.AddStyleSheet(todoFS, "todo.css")
-		if err := h.tpl.Execute(w, view); err != nil {
+		if err := h.tpl.Execute(w, h.newView()); err != nil {
 			h.logger.Error(err.Error())
 		}
 	})
@@ -121,4 +115,14 @@ func (h *ToDo) delete() http.Handler {
 
 		httputil.SeeOther(w, h.path)
 	})
+}
+
+func (h *ToDo) newView() *view.View {
+	v := &view.View{
+		Title: "To Do",
+		Path:  h.path,
+		Data:  h.todos,
+	}
+	v.AddStyleSheet(todoFS, "todo.css")
+	return v
 }
