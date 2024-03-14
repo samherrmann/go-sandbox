@@ -2,6 +2,7 @@ package pages
 
 import (
 	"embed"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -20,21 +21,12 @@ func NewTodoHandler(path string, logger *slog.Logger) (http.Handler, error) {
 		return nil, err
 	}
 
-	mux := http.NewServeMux()
-
 	todo := &ToDo{
 		path:   path,
 		todos:  &models.ToDo{},
 		logger: logger,
 		tpl:    tpl,
-		mux:    mux,
 	}
-
-	mux.Handle("GET /{$}", todo.read())
-	mux.Handle("POST /create", todo.create())
-	mux.Handle("POST /{id}/update", todo.update())
-	mux.Handle("POST /{id}/delete", todo.delete())
-
 	return todo, nil
 }
 
@@ -43,84 +35,84 @@ type ToDo struct {
 	tpl    *view.Template
 	logger *slog.Logger
 	todos  *models.ToDo
-	mux    *http.ServeMux
 }
 
 func (h *ToDo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	h.mux.ServeHTTP(w, r)
-}
-
-func (h *ToDo) read() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		h.renderView(w, http.StatusOK, nil)
-	})
-}
-
-func (h *ToDo) create() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		h.read(w)
+	case http.MethodPost:
 		if err := h.parseForm(w, r); err != nil {
 			return
 		}
-
-		h.todos.Append(r.Form.Get("value"))
-
-		httputil.SeeOther(w, h.path)
-	})
+		action := r.Form.Get("action")
+		switch action {
+		case "create":
+			h.create(w, r)
+		case "update":
+			h.update(w, r)
+		case "delete":
+			h.delete(w, r)
+		default:
+			err := fmt.Errorf("unknown action %q", action)
+			h.renderViewWithError(w, http.StatusBadRequest, err)
+		}
+	default:
+		http.NotFound(w, r)
+	}
 }
 
-func (h *ToDo) update() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if err := h.parseForm(w, r); err != nil {
-			return
-		}
-
-		indexStr := r.PathValue("id")
-		index, err := strconv.Atoi(indexStr)
-		if err != nil {
-			h.renderView(w, http.StatusBadRequest, err)
-			return
-		}
-
-		value := r.Form.Get("value")
-		if err := h.todos.Update(index, value); err != nil {
-			h.renderView(w, http.StatusBadRequest, err)
-			return
-		}
-		httputil.SeeOther(w, h.path)
-	})
+func (h *ToDo) read(w http.ResponseWriter) {
+	h.renderView(w, http.StatusOK)
 }
 
-func (h *ToDo) delete() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if err := h.parseForm(w, r); err != nil {
-			return
-		}
+func (h *ToDo) create(w http.ResponseWriter, r *http.Request) {
+	v := r.Form.Get("value")
+	h.todos.Append(v)
+	httputil.SeeOther(w, h.path)
+}
 
-		indexStr := r.PathValue("id")
-		index, err := strconv.Atoi(indexStr)
-		if err != nil {
-			h.renderView(w, http.StatusBadRequest, err)
-			return
-		}
+func (h *ToDo) update(w http.ResponseWriter, r *http.Request) {
+	index, err := strconv.Atoi(r.Form.Get("id"))
+	if err != nil {
+		h.renderViewWithError(w, http.StatusBadRequest, err)
+		return
+	}
+	value := r.Form.Get("value")
+	if err := h.todos.Update(index, value); err != nil {
+		h.renderViewWithError(w, http.StatusBadRequest, err)
+		return
+	}
+	httputil.SeeOther(w, h.path)
+}
 
-		if err := h.todos.Remove(index); err != nil {
-			h.renderView(w, http.StatusBadRequest, err)
-			return
-		}
+func (h *ToDo) delete(w http.ResponseWriter, r *http.Request) {
+	index, err := strconv.Atoi(r.Form.Get("id"))
+	if err != nil {
+		h.renderViewWithError(w, http.StatusBadRequest, err)
+		return
+	}
+	if err := h.todos.Remove(index); err != nil {
+		h.renderViewWithError(w, http.StatusBadRequest, err)
+		return
+	}
 
-		httputil.SeeOther(w, h.path)
-	})
+	httputil.SeeOther(w, h.path)
 }
 
 func (h *ToDo) parseForm(w http.ResponseWriter, r *http.Request) error {
 	err := r.ParseForm()
 	if err != nil {
-		h.renderView(w, http.StatusBadRequest, err)
+		h.renderViewWithError(w, http.StatusBadRequest, err)
 	}
 	return err
 }
 
-func (h *ToDo) renderView(w http.ResponseWriter, statusCode int, err error) {
+func (h *ToDo) renderView(w http.ResponseWriter, statusCode int) {
+	h.renderViewWithError(w, statusCode, nil)
+}
+
+func (h *ToDo) renderViewWithError(w http.ResponseWriter, statusCode int, err error) {
 	if err != nil {
 		h.logger.Error(err.Error())
 	}
@@ -130,6 +122,7 @@ func (h *ToDo) renderView(w http.ResponseWriter, statusCode int, err error) {
 		Path:  h.path,
 		Data:  h.todos,
 	}
+
 	if err != nil {
 		v.Error = err.Error()
 	}

@@ -38,16 +38,11 @@ func newRouter(logger *slog.Logger) (*http.ServeMux, error) {
 	if err != nil {
 		return nil, err
 	}
+	homeHandler := pages.NewHomeHandler(todoPath)
 
-	homePath := "/{$}"
-	homeHandler := pages.NewHomeHandler(homePath, todoPath)
-
-	// Register handlers in mux.
-	//
-	// Trailing-slash redirection:
-	// https://pkg.go.dev/net/http#hdr-Trailing_slash_redirection
-	mux.Handle(todoPath+"/", http.StripPrefix(todoPath, todoHandler))
-	mux.Handle(homePath, homeHandler)
+	// Register handlers in HTTP multiplexer.
+	mux.Handle(todoPath, todoHandler)
+	mux.Handle("/{$}", homeHandler)
 
 	return mux, nil
 }
