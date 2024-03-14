@@ -11,6 +11,7 @@ type View struct {
 	Title  string
 	Path   string
 	Styles template.CSS
+	Error  string
 	Data   any
 }
 
