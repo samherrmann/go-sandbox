@@ -21,7 +21,7 @@ func NewTodoHandler(path string, logger *slog.Logger) (http.Handler, error) {
 		return nil, err
 	}
 
-	todo := &ToDo{
+	todo := &ToDoHandler{
 		path:   path,
 		todos:  &models.ToDo{},
 		logger: logger,
@@ -30,14 +30,14 @@ func NewTodoHandler(path string, logger *slog.Logger) (http.Handler, error) {
 	return todo, nil
 }
 
-type ToDo struct {
+type ToDoHandler struct {
 	path   string
 	tpl    *view.Template
 	logger *slog.Logger
 	todos  *models.ToDo
 }
 
-func (h *ToDo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *ToDoHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		h.read(w)
@@ -62,17 +62,17 @@ func (h *ToDo) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *ToDo) read(w http.ResponseWriter) {
+func (h *ToDoHandler) read(w http.ResponseWriter) {
 	h.renderView(w, http.StatusOK)
 }
 
-func (h *ToDo) create(w http.ResponseWriter, r *http.Request) {
+func (h *ToDoHandler) create(w http.ResponseWriter, r *http.Request) {
 	v := r.Form.Get("value")
 	h.todos.Append(v)
 	httputil.SeeOther(w, h.path)
 }
 
-func (h *ToDo) update(w http.ResponseWriter, r *http.Request) {
+func (h *ToDoHandler) update(w http.ResponseWriter, r *http.Request) {
 	index, err := strconv.Atoi(r.Form.Get("id"))
 	if err != nil {
 		h.renderViewWithError(w, http.StatusBadRequest, err)
@@ -86,7 +86,7 @@ func (h *ToDo) update(w http.ResponseWriter, r *http.Request) {
 	httputil.SeeOther(w, h.path)
 }
 
-func (h *ToDo) delete(w http.ResponseWriter, r *http.Request) {
+func (h *ToDoHandler) delete(w http.ResponseWriter, r *http.Request) {
 	index, err := strconv.Atoi(r.Form.Get("id"))
 	if err != nil {
 		h.renderViewWithError(w, http.StatusBadRequest, err)
@@ -100,7 +100,7 @@ func (h *ToDo) delete(w http.ResponseWriter, r *http.Request) {
 	httputil.SeeOther(w, h.path)
 }
 
-func (h *ToDo) parseForm(w http.ResponseWriter, r *http.Request) error {
+func (h *ToDoHandler) parseForm(w http.ResponseWriter, r *http.Request) error {
 	err := r.ParseForm()
 	if err != nil {
 		h.renderViewWithError(w, http.StatusBadRequest, err)
@@ -108,11 +108,11 @@ func (h *ToDo) parseForm(w http.ResponseWriter, r *http.Request) error {
 	return err
 }
 
-func (h *ToDo) renderView(w http.ResponseWriter, statusCode int) {
+func (h *ToDoHandler) renderView(w http.ResponseWriter, statusCode int) {
 	h.renderViewWithError(w, statusCode, nil)
 }
 
-func (h *ToDo) renderViewWithError(w http.ResponseWriter, statusCode int, err error) {
+func (h *ToDoHandler) renderViewWithError(w http.ResponseWriter, statusCode int, err error) {
 	if err != nil {
 		h.logger.Error(err.Error())
 	}
