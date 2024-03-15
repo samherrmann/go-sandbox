@@ -34,7 +34,7 @@ func newRouter(logger *slog.Logger) (*http.ServeMux, error) {
 
 	// Create handlers.
 	todoPath := "/todo"
-	todoHandler, err := pages.NewTodoHandler(todoPath, logger)
+	todoHandler, err := pages.NewTodoHandler(logger)
 	if err != nil {
 		return nil, err
 	}

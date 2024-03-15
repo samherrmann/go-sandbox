@@ -15,7 +15,7 @@ type View struct {
 	Data   any
 }
 
-func (p *View) AddStyleSheet(fs fs.FS, name string) error {
+func (v *View) AddStyleSheet(fs fs.FS, name string) error {
 	f, err := fs.Open(name)
 	if err != nil {
 		return err
@@ -25,6 +25,6 @@ func (p *View) AddStyleSheet(fs fs.FS, name string) error {
 	if err != nil {
 		return err
 	}
-	p.Styles = template.CSS(fmt.Sprintf("%s\n%s", p.Styles, styles))
+	v.Styles = template.CSS(fmt.Sprintf("%s\n%s", v.Styles, styles))
 	return nil
 }
