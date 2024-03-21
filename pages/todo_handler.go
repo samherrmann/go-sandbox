@@ -4,11 +4,10 @@ import (
 	"embed"
 	"errors"
 	"fmt"
-	"log/slog"
 	"net/http"
 	"strconv"
 
-	"github.com/samherrmann/go-sandbox/httputil"
+	"github.com/samherrmann/go-sandbox/httperror"
 	"github.com/samherrmann/go-sandbox/models"
 	"github.com/samherrmann/go-sandbox/view"
 )
@@ -16,41 +15,36 @@ import (
 //go:embed todo.html todo.css
 var todoFS embed.FS
 
-func NewTodoHandler(logger *slog.Logger) (http.Handler, error) {
+func NewTodoHandler() (httperror.Handler, error) {
 	tpl, err := view.ParseTemplate(todoFS, "todo.html")
 	if err != nil {
 		return nil, err
 	}
 
 	todo := &ToDoHandler{
-		todos:  &models.ToDo{},
-		logger: logger,
-		tpl:    tpl,
+		todos: &models.ToDo{},
+		tpl:   tpl,
 	}
 	return todo, nil
 }
 
 type ToDoHandler struct {
-	tpl    *view.Template
-	logger *slog.Logger
-	todos  *models.ToDo
+	tpl   *view.Template
+	todos *models.ToDo
 }
 
-func (h *ToDoHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *ToDoHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) error {
 	code, err := h.serveHTTP(r)
 	switch code {
 	case http.StatusNotFound:
 		http.NotFound(w, r)
 	case http.StatusSeeOther:
-		httputil.SeeOther(w, r.URL.Path)
+		w.Header().Add("Location", r.URL.Path)
+		w.WriteHeader(http.StatusSeeOther)
 	default:
 		h.renderView(w, code, r.URL.Path, err)
 	}
-
-	// TODO: Can we log errors in a middleware?
-	if err != nil {
-		h.logger.Error(err.Error())
-	}
+	return err
 }
 
 func (h *ToDoHandler) serveHTTP(r *http.Request) (int, error) {
@@ -85,7 +79,7 @@ func (h *ToDoHandler) create(r *http.Request) (int, error) {
 }
 
 func (h *ToDoHandler) update(r *http.Request) (int, error) {
-	index, err := strconv.Atoi(r.Form.Get("id"))
+	index, err := parseIndex(r.Form.Get("index"))
 	if err != nil {
 		return http.StatusBadRequest, err
 	}
@@ -97,7 +91,7 @@ func (h *ToDoHandler) update(r *http.Request) (int, error) {
 }
 
 func (h *ToDoHandler) delete(r *http.Request) (int, error) {
-	index, err := strconv.Atoi(r.Form.Get("id"))
+	index, err := parseIndex(r.Form.Get("index"))
 	if err != nil {
 		return http.StatusBadRequest, err
 	}
@@ -112,11 +106,9 @@ func (h *ToDoHandler) renderView(w http.ResponseWriter, statusCode int, path str
 		Title: "To Do",
 		Path:  path,
 		Data:  h.todos,
+		Error: httperror.String(err),
 	}
 
-	if err != nil {
-		v.Error = err.Error()
-	}
 	// TODO: Figure out a way that the stylesheet doesn't need to be added on
 	// every request.
 	v.AddStyleSheet(todoFS, "todo.css")
@@ -127,4 +119,12 @@ func (h *ToDoHandler) renderView(w http.ResponseWriter, statusCode int, path str
 	}
 
 	return err
+}
+
+func parseIndex(str string) (int, error) {
+	index, err := strconv.Atoi(str)
+	if err != nil {
+		return 0, httperror.New(fmt.Sprintf("invalid index %v", str), err)
+	}
+	return index, nil
 }

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/samherrmann/go-sandbox/httperror"
 	"github.com/samherrmann/go-sandbox/pages"
 )
 
@@ -34,14 +35,14 @@ func newRouter(logger *slog.Logger) (*http.ServeMux, error) {
 
 	// Create handlers.
 	todoPath := "/todo"
-	todoHandler, err := pages.NewTodoHandler(logger)
+	todoHandler, err := pages.NewTodoHandler()
 	if err != nil {
 		return nil, err
 	}
 	homeHandler := pages.NewHomeHandler(todoPath)
 
 	// Register handlers in HTTP multiplexer.
-	mux.Handle(todoPath, todoHandler)
+	mux.Handle(todoPath, httperror.LogHandler(todoHandler, logger))
 	mux.Handle("/{$}", homeHandler)
 
 	return mux, nil
