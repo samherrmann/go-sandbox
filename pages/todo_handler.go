@@ -16,7 +16,7 @@ import (
 var todoFS embed.FS
 
 func NewTodoHandler() (httperror.Handler, error) {
-	tpl, err := view.ParseTemplate(todoFS, "todo.html")
+	tpl, err := view.ParseTemplate(todoFS, "todo.html", "todo.css")
 	if err != nil {
 		return nil, err
 	}
@@ -108,10 +108,6 @@ func (h *ToDoHandler) renderView(w http.ResponseWriter, statusCode int, path str
 		Data:  h.todos,
 		Error: httperror.String(err),
 	}
-
-	// TODO: Figure out a way that the stylesheet doesn't need to be added on
-	// every request.
-	v.AddStyleSheet(todoFS, "todo.css")
 
 	w.WriteHeader(statusCode)
 	if err := h.tpl.Execute(w, v); err != nil {

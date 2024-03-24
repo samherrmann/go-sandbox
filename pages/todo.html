@@ -1,24 +1,22 @@
-{{ define "body" }}
-  <ol>
-    {{ range $index, $todo := .Data }}
-      <li>
-        <form method="post" action="{{ $.Path }}">
-          <input type="hidden" name="index" value="{{ $index }}">
-          <input type="text" name="value" value="{{ $todo }}">
-          <div class="controls">
-            <button type="submit" name="action" value="update">
-              Save
-            </button>
-            <button type="submit" name="action" value="delete">
-              Delete
-            </button>
-          </div>
-        </form>
-      </li>
-    {{ end }}
-  </ol>
-  <form method="post" action="{{ $.Path }}" >
-    <input type="text" name="value" autofocus>
-    <button type="submit" name="action" value="create">Add</button>
-  </form>
-{{ end }}
+<ol>
+  {{ range $index, $todo := .Data }}
+    <li>
+      <form method="post" action="{{ $.Path }}">
+        <input type="hidden" name="index" value="{{ $index }}">
+        <input type="text" name="value" value="{{ $todo }}">
+        <div class="controls">
+          <button type="submit" name="action" value="update">
+            Save
+          </button>
+          <button type="submit" name="action" value="delete">
+            Delete
+          </button>
+        </div>
+      </form>
+    </li>
+  {{ end }}
+</ol>
+<form method="post" action="{{ $.Path }}" >
+  <input type="text" name="value" autofocus>
+  <button type="submit" name="action" value="create">Add</button>
+</form>
