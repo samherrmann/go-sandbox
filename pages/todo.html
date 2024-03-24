@@ -1,5 +1,5 @@
 <ol>
-  {{ range $index, $todo := .Data }}
+  {{ range $index, $todo := .Main.ToDos }}
     <li>
       <form method="post" action="{{ $.Path }}">
         <input type="hidden" name="index" value="{{ $index }}">

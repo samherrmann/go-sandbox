@@ -16,7 +16,7 @@ import (
 var todoFS embed.FS
 
 func NewTodoHandler() (httperror.Handler, error) {
-	tpl, err := view.ParseTemplate(todoFS, "todo.html", "todo.css")
+	tpl, err := view.ParseTemplate[*ToDoViewData](todoFS, "todo.html", "todo.css")
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +29,7 @@ func NewTodoHandler() (httperror.Handler, error) {
 }
 
 type ToDoHandler struct {
-	tpl   *view.Template
+	tpl   *view.Template[*ToDoViewData]
 	todos *models.ToDo
 }
 
@@ -102,10 +102,12 @@ func (h *ToDoHandler) delete(r *http.Request) (int, error) {
 }
 
 func (h *ToDoHandler) renderView(w http.ResponseWriter, statusCode int, path string, err error) error {
-	v := &view.View{
+	v := &view.ViewData[*ToDoViewData]{
 		Title: "To Do",
 		Path:  path,
-		Data:  h.todos,
+		Main: &ToDoViewData{
+			ToDos: h.todos,
+		},
 		Error: httperror.String(err),
 	}
 

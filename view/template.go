@@ -12,7 +12,7 @@ import (
 //go:embed root.html
 var embedded embed.FS
 
-func ParseTemplate(fsys fs.FS, htmlFilename string, cssFilename string) (*Template, error) {
+func ParseTemplate[T any](fsys fs.FS, htmlFilename string, cssFilename string) (*Template[T], error) {
 	fsys = fsutil.MergeFS(embedded, fsys)
 
 	filenames := map[string]string{
@@ -36,13 +36,13 @@ func ParseTemplate(fsys fs.FS, htmlFilename string, cssFilename string) (*Templa
 		}
 	}
 
-	return &Template{std: tpl}, nil
+	return &Template[T]{std: tpl}, nil
 }
 
-type Template struct {
+type Template[T any] struct {
 	std *template.Template
 }
 
-func (t *Template) Execute(w io.Writer, view *View) error {
+func (t *Template[T]) Execute(w io.Writer, view *ViewData[T]) error {
 	return t.std.ExecuteTemplate(w, "root", view)
 }
