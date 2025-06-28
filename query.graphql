@@ -1,0 +1,19 @@
+query getOrder($name: String) {
+  orders(first: 1, query: $name) {
+    nodes {
+      id
+      name
+      createdAt
+      lineItems(first: 100) {
+        nodes {
+          sku
+          discountedUnitPriceAfterAllDiscountsSet {
+            presentmentMoney {
+              amount
+            }
+          }
+        }
+      }
+    }
+  }
+}
