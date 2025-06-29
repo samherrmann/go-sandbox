@@ -1,3 +1,5 @@
 config.json
 dist
 go-sandbox
+*.html
+!*.tpl.html

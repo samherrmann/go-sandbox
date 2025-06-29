@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"html/template"
 	"io"
 	"os"
 	"strings"
@@ -40,7 +42,7 @@ func app() error {
 	req := &graphql.Request{
 		Query: string(query),
 		Variables: map[string]string{
-			"name": orderNumber,
+			"query": "name:" + orderNumber,
 		},
 	}
 
@@ -48,11 +50,32 @@ func app() error {
 	if err != nil {
 		return fmt.Errorf("sending GraphQL request: %w", err)
 	}
-
-	if _, err := io.Copy(os.Stdout, res); err != nil {
-		return fmt.Errorf("reading response: %w", err)
-	}
 	defer res.Close()
 
-	return nil
+	orderTpl, err := template.ParseFiles("invoice.tpl.html")
+	if err != nil {
+		return err
+	}
+
+	file, err := os.OpenFile(
+		fmt.Sprintf("invoice-%v.html", orderNumber),
+		os.O_CREATE|os.O_WRONLY|os.O_TRUNC,
+		0644,
+	)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	data, err := io.ReadAll(res)
+	if err != nil {
+		return err
+	}
+
+	m := map[string]any{}
+	if err := json.Unmarshal(data, &m); err != nil {
+		return err
+	}
+
+	return orderTpl.Execute(file, m)
 }

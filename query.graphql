@@ -1,5 +1,5 @@
-query getOrder($name: String) {
-  orders(first: 1, query: $name) {
+query getOrder($query: String) {
+  orders(first: 1, query: $query) {
     nodes {
       id
       name
