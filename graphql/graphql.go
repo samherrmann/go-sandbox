@@ -42,5 +42,5 @@ func Send(shop string, accessToken string, req *Request) (io.ReadCloser, error) 
 
 type Request struct {
 	Query     string `json:"query"`
-	Variables any    `json:"variables"`
+	Variables any    `json:"variables,omitempty"`
 }

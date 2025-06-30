@@ -1,0 +1,21 @@
+query getOrders {
+  orders(first: 50, reverse: true) {
+    nodes {
+      id
+      name
+      createdAt
+			customer {
+        firstName
+        lastName
+        defaultAddress{
+          company
+        }
+      }
+    }
+		pageInfo {
+      endCursor
+      hasPreviousPage
+      hasNextPage
+    }
+  }
+}
